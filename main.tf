@@ -58,21 +58,36 @@ resource "aws_subnet" "private_b" {
 }
 
 resource "aws_instance" "terraform_instance" {
-    ami = "ami-0b683223eeade51eb"
+    ami = "ami-0aeeebd8d2ab47354"
     instance_type = "t2.micro"
     associate_public_ip_address = true
     subnet_id = aws_subnet.private_a.id
+    security_groups = [aws_security_group.ssh.id]
+    tags = {
+        Name = "terraform_instance"
+    }
 }
 
-resource "aws_security_group_rule" "terraform_security" {
-    type = "ingress"
-    from_port = 22
-    to_port = 22
-    protocol = "tcp"
-    security_group_id = aws_subnet.public_a.id
-}
+resource "aws_security_group" "ssh" {
+  vpc_id      = aws_vpc.terraform_vpc.id
 
-resource "aws_key_pair" "deployer" {
-    key_name = var.aws_ec2_key_name
-    public_key = var.aws_ec2_public_key
+  ingress {
+    from_port        = 22
+    to_port          = 22
+    protocol         = "tcp"
+    cidr_blocks      = [aws_vpc.terraform_vpc.cidr_block]
+
+  }
+
+  egress {
+    from_port        = 0
+    to_port          = 0
+    protocol         = "-1"
+    cidr_blocks      = ["0.0.0.0/0"]
+    ipv6_cidr_blocks = ["::/0"]
+  }
+
+  tags = {
+    Name = "terraform_ssh"
+  }
 }
