@@ -1,68 +1,38 @@
-resource "aws_vpc" "terraform_vpc" {
-  cidr_block = "10.0.0.0/16"
-  tags = {
-    Name = "terraform-vpc"
-  }
-}
-
-resource "aws_subnet" "public_a" {
-  vpc_id            = aws_vpc.terraform_vpc.id
-  availability_zone = "us-east-1a"
-  cidr_block        = "10.0.0.0/24"
-  tags = {
-    "Name" = "PublicA"
-  }
+# Public Subnet for instances with access to the internet
+resource "aws_subnet" "public" {
+  vpc_id                  = aws_vpc.terraform_vpc.id
+  availability_zone       = var.availability_zone
+  cidr_block              = var.subnet_cidr_block_public
   map_public_ip_on_launch = true
+  tags = {
+    "Name" = "public-a-subnet"
+  }
+
 }
 
-resource "aws_subnet" "public_b" {
-  vpc_id            = aws_vpc.terraform_vpc.id
-  availability_zone = "us-east-1b"
-  cidr_block        = "10.0.1.0/24"
+# Private Subnet for instances with no access to the internet
+resource "aws_subnet" "private" {
+  vpc_id                  = aws_vpc.terraform_vpc.id
+  availability_zone       = var.availability_zone
+  cidr_block              = var.subnet_cidr_block_private
+  map_public_ip_on_launch = false
   tags = {
-    "Name" = "PublicB"
+    "Name" = "public-b-subnet"
   }
-  map_public_ip_on_launch = true
+
 }
 
-resource "aws_subnet" "private_a" {
-  vpc_id            = aws_vpc.terraform_vpc.id
-  availability_zone = "us-east-1a"
-  cidr_block        = "10.0.16.0/20"
-  tags = {
-    "Name" = "PrivateA"
-  }
+variable "availability_zone" {
+  type    = string
+  default = "us-east-1a"
 }
 
-resource "aws_subnet" "private_b" {
-  vpc_id            = aws_vpc.terraform_vpc.id
-  availability_zone = "us-east-1b"
-  cidr_block        = "10.0.32.0/20"
-  tags = {
-    "Name" = "PrivateB"
-  }
+variable "subnet_cidr_block_public" {
+  type = string
+  default = "10.0.0.0/24"
 }
 
-resource "aws_iam_role" "s3_full_access" {
-  name = "terraform_s3_full_access"
-
-  # Terraform's "jsonencode" function converts a
-  # Terraform expression result to valid JSON syntax.
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Action = "sts:AssumeRole"
-        Effect = "Allow"
-        Sid    = ""
-        Principal = {
-          Service = "ec2.amazonaws.com"
-        }
-      },
-    ]
-  })
-
-  tags = {
-    Name = "terraform_s3_full_access"
-  }
+variable "subnet_cidr_block_private" {
+  type = string
+  default = "10.0.1.0/24"
 }
