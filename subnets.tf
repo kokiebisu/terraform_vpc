@@ -5,7 +5,7 @@ resource "aws_subnet" "public" {
   cidr_block              = var.subnet_cidr_block_public
   map_public_ip_on_launch = true
   tags = {
-    "Name" = "public-a-subnet"
+    "Name" = "public-subnet"
   }
 
 }
@@ -17,7 +17,7 @@ resource "aws_subnet" "private" {
   cidr_block              = var.subnet_cidr_block_private
   map_public_ip_on_launch = false
   tags = {
-    "Name" = "public-b-subnet"
+    "Name" = "public-subnet"
   }
 
 }
@@ -28,11 +28,11 @@ variable "availability_zone" {
 }
 
 variable "subnet_cidr_block_public" {
-  type = string
+  type    = string
   default = "10.0.0.0/24"
 }
 
 variable "subnet_cidr_block_private" {
-  type = string
+  type    = string
   default = "10.0.1.0/24"
 }
